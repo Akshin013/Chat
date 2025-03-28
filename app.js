@@ -58,23 +58,50 @@ const messageDiv = document.querySelector(".message-div")
 // localStorage.clear()
 // send.addEventListener("click", add)
 
-function add() {
-    let a = input.value;
-    messageDiv.innerHTML += `
-        <div class="message">${a}</div>
-    `;
-    
-    input.value = "";
+function loadMessages() {
+            // Очищаем текущее содержимое div перед загрузкой новых сообщений
+            messageDiv.innerHTML = "";
 
-    let messageIndex = localStorage.getItem('messageIndex') || 0;
+            // Получаем все сообщения из localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key.startsWith('message')) {
+                    let message = localStorage.getItem(key);
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message');
+                    messageElement.textContent = message;
+                    messageDiv.appendChild(messageElement);
+                }
+            }
 
-    localStorage.setItem('message' + messageIndex, a);
-    messageIndex++;
-    localStorage.setItem('messageIndex', messageIndex);
+            // Прокручиваем div до самого низа
+            messageDiv.scrollTop = messageDiv.scrollHeight;
+        }
 
+        // Функция для добавления нового сообщения
+        function addMessage() {
+            let a = input.value;
+            if (a.trim() === "") return; // Если поле пустое, ничего не добавляем
 
-    console.log(localStorage);
-}
+            // Получаем текущий индекс из localStorage или начинаем с 0
+            let messageIndex = localStorage.getItem('messageIndex') || 0;
 
-// localStorage.clear();     // Очистка localStorage при загрузке страницы (для примера)
-send.addEventListener("click", add);
+            // Сохраняем новое сообщение в localStorage с уникальным ключом
+            localStorage.setItem('message' + messageIndex, a);
+
+            // Увеличиваем индекс и сохраняем его для следующего сообщения
+            messageIndex++;
+            localStorage.setItem('messageIndex', messageIndex);
+
+            // Очищаем поле ввода
+            input.value = "";
+
+            // Перезагружаем сообщения
+            loadMessages();
+        }
+
+        // Загружаем сообщения при загрузке страницы
+        loadMessages();
+
+        // Слушатель события для кнопки "Отправить"
+        send.addEventListener('click', addMessage);
